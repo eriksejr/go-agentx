@@ -5,11 +5,10 @@
 package agentx
 
 import (
-	"bytes"
 	"sort"
 
-	"github.com/posteo/go-agentx/pdu"
-	"github.com/posteo/go-agentx/value"
+	"github.com/eriksejr/go-agentx/pdu"
+	"github.com/eriksejr/go-agentx/value"
 )
 
 // ListHandler is a helper that takes a list of oids and implements
@@ -51,21 +50,12 @@ func (l *ListHandler) GetNext(from value.OID, includeFrom bool, to value.OID) (v
 		return nil, pdu.VariableTypeNoSuchObject, nil, nil
 	}
 
-	fromOID, toOID := from.String(), to.String()
-	for _, oid := range l.oids {
-		if oidWithin(oid, fromOID, includeFrom, toOID) {
-			return l.Get(value.MustParseOID(oid))
+	for _, strOid := range l.oids {
+		oid := value.MustParseOID(strOid)
+		if oid.Within(from, includeFrom, to) {
+			return l.Get(oid)
 		}
 	}
 
 	return nil, pdu.VariableTypeNoSuchObject, nil, nil
-}
-
-func oidWithin(oid string, from string, includeFrom bool, to string) bool {
-	oidBytes, fromBytes, toBytes := []byte(oid), []byte(from), []byte(to)
-
-	fromCompare := bytes.Compare(fromBytes, oidBytes)
-	toCompare := bytes.Compare(toBytes, oidBytes)
-
-	return (fromCompare == -1 || (fromCompare == 0 && includeFrom)) && (toCompare == 1)
 }

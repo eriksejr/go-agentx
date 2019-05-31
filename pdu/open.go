@@ -5,7 +5,7 @@
 package pdu
 
 import (
-	"github.com/posteo/go-agentx/marshaler"
+	"github.com/eriksejr/go-agentx/marshaler"
 	"gopkg.in/errgo.v1"
 )
 
