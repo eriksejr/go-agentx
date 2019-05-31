@@ -4,21 +4,9 @@
 
 package pdu
 
-import "github.com/eriksejr/go-agentx/value"
-
 // Get defines the pdu get packet.
 type Get struct {
-	SearchRange Range
-}
-
-// GetOID returns the oid.
-func (g *Get) GetOID() value.OID {
-	return g.SearchRange.From.GetIdentifier()
-}
-
-// SetOID sets the provided oid.
-func (g *Get) SetOID(oid value.OID) {
-	g.SearchRange.From.SetIdentifier(oid)
+	SearchRanges Ranges
 }
 
 // Type returns the pdu packet type.
@@ -33,7 +21,7 @@ func (g *Get) MarshalBinary() ([]byte, error) {
 
 // UnmarshalBinary sets the packet structure from the provided slice of bytes.
 func (g *Get) UnmarshalBinary(data []byte) error {
-	if err := g.SearchRange.UnmarshalBinary(data); err != nil {
+	if err := g.SearchRanges.UnmarshalBinary(data); err != nil {
 		return err
 	}
 	return nil

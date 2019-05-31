@@ -133,23 +133,24 @@ func (s *Session) handle(request *pdu.HeaderPacket) *pdu.HeaderPacket {
 	switch requestPacket := request.Packet.(type) {
 	case *pdu.Get:
 		if s.Handler == nil {
-			log.Printf("warning: no handler for session specified")
-			responsePacket.Variables.Add(requestPacket.GetOID(), pdu.VariableTypeNull, nil)
+			panic("no handler for session specified")
 		} else {
-			oid, t, v, err := s.Handler.Get(requestPacket.GetOID())
-			if err != nil {
-				log.Printf("error while handling packet: %s", errgo.Details(err))
-				responsePacket.Error = pdu.ErrorProcessing
-			}
-			if oid == nil {
-				responsePacket.Variables.Add(requestPacket.GetOID(), pdu.VariableTypeNoSuchObject, nil)
-			} else {
-				responsePacket.Variables.Add(oid, t, v)
+			for _, sr := range requestPacket.SearchRanges {
+				oid, t, v, err := s.Handler.Get(sr.From.GetIdentifier())
+				if err != nil {
+					log.Printf("error while handling packet: %s", errgo.Details(err))
+					responsePacket.Error = pdu.ErrorProcessing
+				}
+				if oid == nil {
+					responsePacket.Variables.Add(sr.From.GetIdentifier(), pdu.VariableTypeNoSuchObject, nil)
+				} else {
+					responsePacket.Variables.Add(oid, t, v)
+				}
 			}
 		}
 	case *pdu.GetNext:
 		if s.Handler == nil {
-			log.Printf("warning: no handler for session specified")
+			panic("no handler for session specified")
 		} else {
 			for _, sr := range requestPacket.SearchRanges {
 				oid, t, v, err := s.Handler.GetNext(sr.From.GetIdentifier(), (sr.From.Include == 1), sr.To.GetIdentifier())
